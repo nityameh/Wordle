@@ -14,7 +14,7 @@ const Game = () => {
 
     const fetchRandomWord = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/word/random');
+            const response = await axios.get('http://localhost:8080/api/word/random');
             setRandomWord(response.data.word.toUpperCase());
         } catch (error) {
             console.error('Error fetching random word:', error);
@@ -44,7 +44,7 @@ const Game = () => {
                     colorRow(grid[currentRow], randomWord);
                 } else {
                     try {
-                        const response = await axios.post('http://localhost:3000/api/word/check', { word });
+                        const response = await axios.post('http://localhost:8080/api/word/check', { word });
                         const exists = response.data.exists;
                         if (exists) {
                             setMessage('');

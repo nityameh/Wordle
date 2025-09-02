@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import './index.css';
 import Game from './Game';
@@ -7,6 +7,9 @@ import Game from './Game';
 import firstPic from '../src/assets/first.png';
 import secondPic from '../src/assets/second.png';
 import thirdPic from '../src/assets/third.png';
+
+// Use environment variable for backend API URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,39 +47,39 @@ function App() {
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post('http://localhost:3000/api/auth/login', loginData);
-        
-        if (response && response.data) {
-            // Store user data
-            localStorage.setItem('userData', JSON.stringify(response.data.user));
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/login`,
+        loginData,
+        { withCredentials: true }
+      );
 
-            // Fetch a random word
-            const wordResponse = await axios.get('http://localhost:3000/api/word/random');
-            const randomWord = wordResponse.data.word;
-            
-            // Store the word in localStorage
-            localStorage.setItem('randomWord', randomWord);
-
-            // Redirect to the game page
-            window.location.href = '/game';
-        } else {
-            setLoginError('Unexpected response structure. Please try again.');
-        }
+      if (response && response.data) {
+        localStorage.setItem('userData', JSON.stringify(response.data.user));
+        // Fetch a random word
+        const wordResponse = await axios.get(`${API_BASE_URL}/api/word/random`, { withCredentials: true });
+        const randomWord = wordResponse.data.word;
+        localStorage.setItem('randomWord', randomWord);
+        window.location.href = '/game';
+      } else {
+        setLoginError('Unexpected response structure. Please try again.');
+      }
     } catch (error) {
-        setLoginError(error.response?.data?.message || 'Login failed. Please try again.');
+      setLoginError(error.response?.data?.message || 'Login failed. Please try again.');
     }
-};
-
+  };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/register', registerData);
-      // Handle successful registration (e.g., redirect to login page)
+      await axios.post(
+        `${API_BASE_URL}/api/auth/register`,
+        registerData,
+        { withCredentials: true }
+      );
       closeRegisterModal();
       openLoginModal();
     } catch (error) {
-      setRegisterError(error.response.data.message);
+      setRegisterError(error.response?.data?.message || 'Registration failed. Please try again.');
     }
   };
 
